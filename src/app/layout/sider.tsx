@@ -31,8 +31,6 @@ const SiderAdmin = ({ children }: { children: React.ReactNode }) => {
       setActiveKey('2');
     } else if (pathname === '/task') {
       setActiveKey('3');
-    } else if (pathname === '/taskDaily') {
-      setActiveKey('4');
     }
   }, [pathname]); // Sử dụng pathname thay vì router.pathname
 
@@ -59,11 +57,6 @@ const SiderAdmin = ({ children }: { children: React.ReactNode }) => {
               key: '3',
               icon: <CalendarOutlined />,
               label: <div onClick={() => handleNavigate('/task', '3')}> Manage Task</div>,
-            },
-            {
-              key: '4',
-              icon: <CalendarOutlined />,
-              label: <div onClick={() => handleNavigate('/taskDaily', '4')}> Manage Task Daily</div>,
             },
           ]}
         />

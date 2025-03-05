@@ -9,56 +9,61 @@ import {
 } from '@ant-design/icons';
 import { Button, Layout, Menu, theme } from 'antd';
 import { useRouter, usePathname } from 'next/navigation'; 
+
 const { Header, Sider, Content } = Layout;
 
 const SiderAdmin = ({ children }: { children: React.ReactNode }) => {
   const [collapsed, setCollapsed] = useState(false);
-  const [activeKey, setActiveKey] = useState('1');
+  const [isMobile, setIsMobile] = useState(false); // Thêm state kiểm tra mobile
+
   const {
     token: { colorBgContainer, borderRadiusLG },
   } = theme.useToken();
-  const router = useRouter(); // Khởi tạo router
-  const pathname = usePathname(); // Thêm hook này
-  const handleNavigate = (path: string, key: string) => {
-    setActiveKey(key);
-    router.push(path); // Chuyển đến đường dẫn được chỉ định
-};
+
+  const router = useRouter();
+  const pathname = usePathname();
+
+  // Kiểm tra kích thước màn hình để tự động thu nhỏ Sider khi ở chế độ mobile
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 768); // Nếu nhỏ hơn 768px => Mobile
+    };
+
+    handleResize(); // Gọi lần đầu để kiểm tra trạng thái ban đầu
+    window.addEventListener("resize", handleResize);
+
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   useEffect(() => {
-    if (pathname === '/') {
-      setActiveKey('1');
-    } else if (pathname === '/users') {
-      setActiveKey('2');
-    } else if (pathname === '/task') {
-      setActiveKey('3');
-    }
-  }, [pathname]); // Sử dụng pathname thay vì router.pathname
+    if (isMobile) setCollapsed(true); // Nếu là mobile thì tự động thu sidebar
+  }, [isMobile]);
+
+  const menuItems = [
+    { key: '/', icon: <HomeOutlined />, label: 'Home Page' },
+    { key: '/users', icon: <UserSwitchOutlined />, label: 'Manage Users' },
+    { key: '/task', icon: <CalendarOutlined />, label: 'Manage Task' }
+  ];
 
   return (
     <Layout>
-      <Sider trigger={null} collapsible collapsed={collapsed}>
+      <Sider 
+        trigger={null} 
+        collapsible 
+        collapsed={collapsed} 
+        collapsedWidth={isMobile ? 0 : 80} // Ẩn hoàn toàn khi là mobile
+      >
         <div className="demo-logo-vertical" />
         <Menu
           theme="dark"
           mode="inline"
-          selectedKeys={[activeKey]}
-          items={[
-            {
-              key: '1',
-              icon: <HomeOutlined />,
-              label: <div onClick={() => handleNavigate('/', '1')}>Home Page</div>,
-            },
-            {
-              key: '2',
-              icon: <UserSwitchOutlined />,
-              label:<div onClick={() => handleNavigate('/users', '2')}> Manage Users</div>,
-            },
-            {
-              key: '3',
-              icon: <CalendarOutlined />,
-              label: <div onClick={() => handleNavigate('/task', '3')}> Manage Task</div>,
-            },
-          ]}
+          selectedKeys={[pathname]} 
+          onClick={({ key }) => router.push(key)}
+          items={menuItems.map(({ key, icon, label }) => ({
+            key,
+            icon,
+            label,
+          }))}
         />
       </Sider>
       <Layout>
@@ -67,6 +72,7 @@ const SiderAdmin = ({ children }: { children: React.ReactNode }) => {
             type="text"
             icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
             onClick={() => setCollapsed(!collapsed)}
+            aria-label="Toggle sidebar"
             style={{
               fontSize: '16px',
               width: 64,
@@ -76,7 +82,7 @@ const SiderAdmin = ({ children }: { children: React.ReactNode }) => {
         </Header>
         <Content
           style={{
-            margin: '10px 10px',
+            margin: '10px',
             padding: 10,
             minHeight: 280,
             background: colorBgContainer,

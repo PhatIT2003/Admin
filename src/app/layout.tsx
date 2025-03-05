@@ -18,7 +18,7 @@ export default function RootLayout({
 
   useEffect(() => {
     const token = localStorage.getItem('token'); // Check for token in localStorage
-    console.log('Token:', token); // Log token để kiểm tra
+
     if (!token) {
       console.log('No token found, redirecting to login'); // Log khi không có token
       router.push('/login'); // Redirect to login if token is not found
